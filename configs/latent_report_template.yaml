@@ -1,0 +1,20 @@
+manifest_path: outputs/map2_roi_first_real_dataset/manifests/map2_roi_first_real_dataset_patch_manifest.csv
+output_dir: outputs/map2_roi_first_real_dataset/latent_report
+
+features:
+  channels:
+    - MAP2
+    - FLAG
+    - HA
+    - SHANK2
+
+dimensionality_reduction:
+  n_pca_components: 8
+
+clustering:
+  method: gmm
+  n_clusters: 8
+  random_seed: 42
+
+reporting:
+  representatives_per_cluster: 12

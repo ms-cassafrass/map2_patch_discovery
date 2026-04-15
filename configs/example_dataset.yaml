@@ -1,0 +1,57 @@
+dataset_name: first_pass_map2_dataset
+output_dir: outputs/first_pass_map2_dataset
+
+patch:
+  width_px: 48
+  height_px: 48
+  z_window: 11
+  stride_px: 24
+  max_patches_per_group: 300
+
+sampling:
+  groups:
+    - in_mask
+    - boundary
+    - near_mask_outside
+    - far_background
+  boundary_width_px: 6
+  near_outside_distance_px: 24
+  far_background_min_distance_px: 48
+  random_seed: 42
+
+cohort:
+  channel_schema: map2_flag_ha_shank2_v1
+  required_channels:
+    - MAP2
+    - FLAG
+    - HA
+    - SHANK2
+
+samples:
+  - sample_id: neg_001
+    condition: negative
+    experiment_date: 2026-04-15
+    coverslip: cs01
+    culture_batch: batch_a
+    field_of_view: fov01
+    image_path: data/example_neg_001.ome.tif
+    mask_path: data/example_neg_001_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: pos_001
+    condition: positive
+    experiment_date: 2026-04-15
+    coverslip: cs02
+    culture_batch: batch_a
+    field_of_view: fov01
+    image_path: data/example_pos_001.ome.tif
+    mask_path: data/example_pos_001_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
