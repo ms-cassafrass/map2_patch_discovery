@@ -1,0 +1,22 @@
+manifest_path: outputs/map2_roi_3_20_26_two_sample/manifests/map2_roi_3_20_26_two_sample_patch_manifest.csv
+output_dir: outputs/map2_roi_3_20_26_two_sample/latent_report_feature_variance_cluster_1
+
+features:
+  channels:
+    - MAP2
+    - FLAG
+    - HA
+    - SHANK2
+  feature_variance_csv: outputs/map2_roi_3_20_26_two_sample/latent_report/2cluster_feature_variance_only/feature_variance_clusters.csv
+  feature_variance_cluster: 1
+
+dimensionality_reduction:
+  n_pca_components: 8
+
+clustering:
+  method: gmm
+  n_clusters: 8
+  random_seed: 42
+
+reporting:
+  representatives_per_cluster: 12

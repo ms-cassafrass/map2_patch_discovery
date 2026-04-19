@@ -14,6 +14,10 @@ class PatchConfig:
     z_window: int
     stride_px: int
     max_patches_per_group: int
+    save_compressed: bool
+    resume: bool
+    use_sample_cache: bool
+    shard_by_group: bool
 
 
 @dataclass(frozen=True)
@@ -84,7 +88,11 @@ def load_dataset_config(config_path: str | Path) -> DatasetConfig:
     cohort_raw = raw["cohort"]
     samples_raw = raw["samples"]
 
-    _require_keys(patch_raw, ["width_px", "height_px", "z_window", "stride_px", "max_patches_per_group"], "patch")
+    _require_keys(
+        patch_raw,
+        ["width_px", "height_px", "z_window", "stride_px", "max_patches_per_group"],
+        "patch",
+    )
     _require_keys(
         sampling_raw,
         ["groups", "boundary_width_px", "near_outside_distance_px", "far_background_min_distance_px", "random_seed"],
@@ -100,6 +108,10 @@ def load_dataset_config(config_path: str | Path) -> DatasetConfig:
         z_window=int(patch_raw["z_window"]),
         stride_px=int(patch_raw["stride_px"]),
         max_patches_per_group=int(patch_raw["max_patches_per_group"]),
+        save_compressed=bool(patch_raw.get("save_compressed", False)),
+        resume=bool(patch_raw.get("resume", True)),
+        use_sample_cache=bool(patch_raw.get("use_sample_cache", True)),
+        shard_by_group=bool(patch_raw.get("shard_by_group", True)),
     )
     sampling = SamplingConfig(
         groups=[str(group) for group in sampling_raw["groups"]],
@@ -168,6 +180,8 @@ def validate_dataset_config(config: DatasetConfig) -> None:
         raise ValueError("Patch stride must be positive")
     if config.patch.max_patches_per_group <= 0:
         raise ValueError("max_patches_per_group must be positive")
+    if config.patch.z_window % 2 == 0:
+        raise ValueError("Patch z_window must be odd for centered extraction")
     if not config.cohort.required_channels:
         raise ValueError("At least one required channel must be defined")
     if not config.samples:

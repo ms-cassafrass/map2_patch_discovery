@@ -22,6 +22,10 @@ dependencies = [
 [project.scripts]
 map2-patch-extract = "map2_patch_discovery.cli:main"
 map2-latent-report = "map2_patch_discovery.report_cli:main"
+map2-mask-export = "map2_patch_discovery.mask_cli:main"
+map2-mask-batch = "map2_patch_discovery.mask_batch_cli:main"
+map2-feature-variance = "map2_patch_discovery.feature_variance_cli:main"
+map2-feature-variance-batch = "map2_patch_discovery.feature_variance_batch_cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

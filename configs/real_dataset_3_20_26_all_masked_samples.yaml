@@ -1,0 +1,61 @@
+dataset_name: map2_roi_3_20_26_all_masked_samples
+output_dir: outputs/map2_roi_3_20_26_all_masked_samples
+
+patch:
+  width_px: 32
+  height_px: 32
+  z_window: 11
+  stride_px: 8
+  max_patches_per_group: 400
+  save_compressed: false
+  resume: true
+  use_sample_cache: true
+  shard_by_group: true
+
+sampling:
+  groups:
+    - in_mask
+    - boundary
+    - near_mask_outside
+    - far_background
+  boundary_width_px: 6
+  near_outside_distance_px: 24
+  far_background_min_distance_px: 48
+  random_seed: 42
+
+cohort:
+  channel_schema: map2_flag_ha_shank2_v1
+  required_channels:
+    - MAP2
+    - FLAG
+    - HA
+    - SHANK2
+
+samples:
+  - sample_id: untreated_div16_flag546_ha488_shank647_001
+    condition: negative
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: untreated_001
+    image_path: E:\Localization_images\3.20.26\raw_ome\untreated_div16_flag546_ha488_shank647_001.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\untreated_div16_flag546_ha488_shank647_001\untreated_div16_flag546_ha488_shank647_001.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_023
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_023
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_023.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_023\8and9_div16_flag546_ha488_shank647_023.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2

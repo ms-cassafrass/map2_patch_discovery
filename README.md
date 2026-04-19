@@ -41,6 +41,23 @@ python -m pip install --upgrade pip
 python -m pip install -e .
 ```
 
+## External Requirements
+
+For ND2 -> OME-TIFF conversion with Bio-Formats command-line tools:
+
+- `bfconvert.BAT` must be installed
+- Java must be installed separately and available on `PATH`
+
+Quick check:
+
+```powershell
+java -version
+& "C:\path\to\bftools\bfconvert.BAT" -help
+```
+
+If `java -version` fails, Bio-Formats conversion will fail even if `bfconvert.BAT`
+exists.
+
 ## Example
 
 ```powershell
@@ -59,3 +76,25 @@ Current manifest output includes:
 - MAP2-relative sampling group
 - spatial coordinates and mask-overlap fields
 - per-channel summary values: `mean`, `max`, `sum`, `std`, `z_peak_index`, `z_occupancy`
+
+## MAP2 Mask Export
+
+Use the standalone exporter to generate a usable `*_analysismask.ome.tif`
+from the same MAP2-first connectivity-mask design used in the `v5.2` neurite workflow.
+
+Example:
+
+```powershell
+map2-mask-export `
+  "E:\path\to\image.ome.tif" `
+  -o "E:\path\to\mask_output" `
+  --channel 0
+```
+
+This writes:
+
+- `*_analysismask.ome.tif`
+- optional preview PNG
+
+This exporter is self-contained inside `map2-patch-discovery` and does not
+import code from the external `Unisynapse` repository at runtime.

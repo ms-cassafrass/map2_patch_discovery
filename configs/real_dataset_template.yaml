@@ -7,6 +7,10 @@ patch:
   z_window: 11
   stride_px: 24
   max_patches_per_group: 400
+  save_compressed: false
+  resume: true
+  use_sample_cache: true
+  shard_by_group: true
 
 sampling:
   groups:

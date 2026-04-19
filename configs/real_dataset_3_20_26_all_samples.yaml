@@ -1,0 +1,1111 @@
+dataset_name: map2_roi_3_20_26_all_samples
+output_dir: outputs/map2_roi_3_20_26_all_samples
+
+patch:
+  width_px: 32
+  height_px: 32
+  z_window: 11
+  stride_px: 8
+  max_patches_per_group: 400
+  save_compressed: false
+  resume: true
+  use_sample_cache: true
+  shard_by_group: true
+
+sampling:
+  groups:
+    - in_mask
+    - boundary
+    - near_mask_outside
+    - far_background
+  boundary_width_px: 6
+  near_outside_distance_px: 24
+  far_background_min_distance_px: 48
+  random_seed: 42
+
+cohort:
+  channel_schema: map2_flag_ha_shank2_v1
+  required_channels:
+    - MAP2
+    - FLAG
+    - HA
+    - SHANK2
+
+samples:
+  - sample_id: 4and6_div16_flag546_ha488_shank647_002
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_002
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_002.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_002\4and6_div16_flag546_ha488_shank647_002.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_003
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_003
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_003.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_003\4and6_div16_flag546_ha488_shank647_003.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_005
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_005
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_005.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_005\4and6_div16_flag546_ha488_shank647_005.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_006
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_006
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_006.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_006\4and6_div16_flag546_ha488_shank647_006.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_008
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_008
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_008.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_008\4and6_div16_flag546_ha488_shank647_008.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_010
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_010
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_010.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_010\4and6_div16_flag546_ha488_shank647_010.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_012
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_012
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_012.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_012\4and6_div16_flag546_ha488_shank647_012.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_014
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_014
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_014.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_014\4and6_div16_flag546_ha488_shank647_014.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_015
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_015
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_015.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_015\4and6_div16_flag546_ha488_shank647_015.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_016
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_016
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_016.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_016\4and6_div16_flag546_ha488_shank647_016.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_018
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_018
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_018.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_018\4and6_div16_flag546_ha488_shank647_018.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and6_div16_flag546_ha488_shank647_019
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and6_div16_flag546_ha488_shank647_019
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and6_div16_flag546_ha488_shank647_019.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and6_div16_flag546_ha488_shank647_019\4and6_div16_flag546_ha488_shank647_019.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_006
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_006
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_006.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_006\4and7_div16_flag546_ha488_shank647_006.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_007
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_007
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_007.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_007\4and7_div16_flag546_ha488_shank647_007.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_008
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_008
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_008.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_008\4and7_div16_flag546_ha488_shank647_008.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_010
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_010
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_010.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_010\4and7_div16_flag546_ha488_shank647_010.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_012
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_012
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_012.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_012\4and7_div16_flag546_ha488_shank647_012.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_013
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_013
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_013.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_013\4and7_div16_flag546_ha488_shank647_013.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_015
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_015
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_015.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_015\4and7_div16_flag546_ha488_shank647_015.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_017
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_017
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_017.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_017\4and7_div16_flag546_ha488_shank647_017.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_020
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_020
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_020.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_020\4and7_div16_flag546_ha488_shank647_020.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_021
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_021
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_021.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_021\4and7_div16_flag546_ha488_shank647_021.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 4and7_div16_flag546_ha488_shank647_022
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 4and7_div16_flag546_ha488_shank647_022
+    image_path: E:\Localization_images\3.20.26\raw_ome\4and7_div16_flag546_ha488_shank647_022.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\4and7_div16_flag546_ha488_shank647_022\4and7_div16_flag546_ha488_shank647_022.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and10_div16_flag546_ha488_shank647_001
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and10_div16_flag546_ha488_shank647_001
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and10_div16_flag546_ha488_shank647_001.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and10_div16_flag546_ha488_shank647_001\7and10_div16_flag546_ha488_shank647_001.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and10_div16_flag546_ha488_shank647_004
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and10_div16_flag546_ha488_shank647_004
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and10_div16_flag546_ha488_shank647_004.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and10_div16_flag546_ha488_shank647_004\7and10_div16_flag546_ha488_shank647_004.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and10_div16_flag546_ha488_shank647_005
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and10_div16_flag546_ha488_shank647_005
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and10_div16_flag546_ha488_shank647_005.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and10_div16_flag546_ha488_shank647_005\7and10_div16_flag546_ha488_shank647_005.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and10_div16_flag546_ha488_shank647_007
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and10_div16_flag546_ha488_shank647_007
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and10_div16_flag546_ha488_shank647_007.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and10_div16_flag546_ha488_shank647_007\7and10_div16_flag546_ha488_shank647_007.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and10_div16_flag546_ha488_shank647_008
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and10_div16_flag546_ha488_shank647_008
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and10_div16_flag546_ha488_shank647_008.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and10_div16_flag546_ha488_shank647_008\7and10_div16_flag546_ha488_shank647_008.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and10_div16_flag546_ha488_shank647_010
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and10_div16_flag546_ha488_shank647_010
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and10_div16_flag546_ha488_shank647_010.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and10_div16_flag546_ha488_shank647_010\7and10_div16_flag546_ha488_shank647_010.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and10_div16_flag546_ha488_shank647_011
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and10_div16_flag546_ha488_shank647_011
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and10_div16_flag546_ha488_shank647_011.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and10_div16_flag546_ha488_shank647_011\7and10_div16_flag546_ha488_shank647_011.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and10_div16_flag546_ha488_shank647_013
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and10_div16_flag546_ha488_shank647_013
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and10_div16_flag546_ha488_shank647_013.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and10_div16_flag546_ha488_shank647_013\7and10_div16_flag546_ha488_shank647_013.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and10_div16_flag546_ha488_shank647_014
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and10_div16_flag546_ha488_shank647_014
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and10_div16_flag546_ha488_shank647_014.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and10_div16_flag546_ha488_shank647_014\7and10_div16_flag546_ha488_shank647_014.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and9_div16_flag546_ha488_shank647_003
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and9_div16_flag546_ha488_shank647_003
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and9_div16_flag546_ha488_shank647_003.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and9_div16_flag546_ha488_shank647_003\7and9_div16_flag546_ha488_shank647_003.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and9_div16_flag546_ha488_shank647_004
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and9_div16_flag546_ha488_shank647_004
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and9_div16_flag546_ha488_shank647_004.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and9_div16_flag546_ha488_shank647_004\7and9_div16_flag546_ha488_shank647_004.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and9_div16_flag546_ha488_shank647_005
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and9_div16_flag546_ha488_shank647_005
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and9_div16_flag546_ha488_shank647_005.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and9_div16_flag546_ha488_shank647_005\7and9_div16_flag546_ha488_shank647_005.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and9_div16_flag546_ha488_shank647_006
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and9_div16_flag546_ha488_shank647_006
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and9_div16_flag546_ha488_shank647_006.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and9_div16_flag546_ha488_shank647_006\7and9_div16_flag546_ha488_shank647_006.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and9_div16_flag546_ha488_shank647_008
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and9_div16_flag546_ha488_shank647_008
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and9_div16_flag546_ha488_shank647_008.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and9_div16_flag546_ha488_shank647_008\7and9_div16_flag546_ha488_shank647_008.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 7and9_div16_flag546_ha488_shank647_010
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 7and9_div16_flag546_ha488_shank647_010
+    image_path: E:\Localization_images\3.20.26\raw_ome\7and9_div16_flag546_ha488_shank647_010.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\7and9_div16_flag546_ha488_shank647_010\7and9_div16_flag546_ha488_shank647_010.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_001
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_001
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_001.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_001\8amd5_div16_flag546_ha488_shank647_001.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_003
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_003
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_003.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_003\8amd5_div16_flag546_ha488_shank647_003.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_005
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_005
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_005.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_005\8amd5_div16_flag546_ha488_shank647_005.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_006
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_006
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_006.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_006\8amd5_div16_flag546_ha488_shank647_006.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_007
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_007
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_007.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_007\8amd5_div16_flag546_ha488_shank647_007.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_010
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_010
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_010.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_010\8amd5_div16_flag546_ha488_shank647_010.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_011
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_011
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_011.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_011\8amd5_div16_flag546_ha488_shank647_011.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_013
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_013
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_013.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_013\8amd5_div16_flag546_ha488_shank647_013.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_014
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_014
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_014.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_014\8amd5_div16_flag546_ha488_shank647_014.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_015
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_015
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_015.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_015\8amd5_div16_flag546_ha488_shank647_015.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_016
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_016
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_016.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_016\8amd5_div16_flag546_ha488_shank647_016.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8amd5_div16_flag546_ha488_shank647_017
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8amd5_div16_flag546_ha488_shank647_017
+    image_path: E:\Localization_images\3.20.26\raw_ome\8amd5_div16_flag546_ha488_shank647_017.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8amd5_div16_flag546_ha488_shank647_017\8amd5_div16_flag546_ha488_shank647_017.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_001
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_001
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_001.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_001\8and10_div16_flag546_ha488_shank647_001.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_002
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_002
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_002.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_002\8and10_div16_flag546_ha488_shank647_002.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_003
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_003
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_003.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_003\8and10_div16_flag546_ha488_shank647_003.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_005
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_005
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_005.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_005\8and10_div16_flag546_ha488_shank647_005.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_006
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_006
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_006.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_006\8and10_div16_flag546_ha488_shank647_006.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_008
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_008
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_008.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_008\8and10_div16_flag546_ha488_shank647_008.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_010
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_010
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_010.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_010\8and10_div16_flag546_ha488_shank647_010.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_013
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_013
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_013.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_013\8and10_div16_flag546_ha488_shank647_013.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_015
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_015
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_015.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_015\8and10_div16_flag546_ha488_shank647_015.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and10_div16_flag546_ha488_shank647_017
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and10_div16_flag546_ha488_shank647_017
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and10_div16_flag546_ha488_shank647_017.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and10_div16_flag546_ha488_shank647_017\8and10_div16_flag546_ha488_shank647_017.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_001
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_001
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_001.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_001\8and9_div16_flag546_ha488_shank647_001.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_004
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_004
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_004.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_004\8and9_div16_flag546_ha488_shank647_004.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_005
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_005
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_005.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_005\8and9_div16_flag546_ha488_shank647_005.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_007
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_007
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_007.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_007\8and9_div16_flag546_ha488_shank647_007.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_008
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_008
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_008.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_008\8and9_div16_flag546_ha488_shank647_008.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_009
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_009
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_009.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_009\8and9_div16_flag546_ha488_shank647_009.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_010
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_010
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_010.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_010\8and9_div16_flag546_ha488_shank647_010.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_012
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_012
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_012.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_012\8and9_div16_flag546_ha488_shank647_012.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_013
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_013
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_013.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_013\8and9_div16_flag546_ha488_shank647_013.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_015
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_015
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_015.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_015\8and9_div16_flag546_ha488_shank647_015.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_017
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_017
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_017.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_017\8and9_div16_flag546_ha488_shank647_017.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_018
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_018
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_018.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_018\8and9_div16_flag546_ha488_shank647_018.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_020
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_020
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_020.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_020\8and9_div16_flag546_ha488_shank647_020.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: 8and9_div16_flag546_ha488_shank647_023
+    condition: positive
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: 8and9_div16_flag546_ha488_shank647_023
+    image_path: E:\Localization_images\3.20.26\raw_ome\8and9_div16_flag546_ha488_shank647_023.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\8and9_div16_flag546_ha488_shank647_023\8and9_div16_flag546_ha488_shank647_023.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: untreated_div16_flag546_ha488_shank647_001
+    condition: negative
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: untreated_div16_flag546_ha488_shank647_001
+    image_path: E:\Localization_images\3.20.26\raw_ome\untreated_div16_flag546_ha488_shank647_001.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\untreated_div16_flag546_ha488_shank647_001\untreated_div16_flag546_ha488_shank647_001.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: untreated_div16_flag546_ha488_shank647_003
+    condition: negative
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: untreated_div16_flag546_ha488_shank647_003
+    image_path: E:\Localization_images\3.20.26\raw_ome\untreated_div16_flag546_ha488_shank647_003.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\untreated_div16_flag546_ha488_shank647_003\untreated_div16_flag546_ha488_shank647_003.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2
+
+  - sample_id: untreated_div16_flag546_ha488_shank647_005
+    condition: negative
+    experiment_date: 2026-03-20
+    coverslip: unknown
+    culture_batch: div16
+    field_of_view: untreated_div16_flag546_ha488_shank647_005
+    image_path: E:\Localization_images\3.20.26\raw_ome\untreated_div16_flag546_ha488_shank647_005.ome.tif
+    mask_path: E:\Localization_images\3.20.26\map2_masks\untreated_div16_flag546_ha488_shank647_005\untreated_div16_flag546_ha488_shank647_005.ome_analysismask.ome.tif
+    channel_names:
+      - MAP2
+      - FLAG
+      - HA
+      - SHANK2

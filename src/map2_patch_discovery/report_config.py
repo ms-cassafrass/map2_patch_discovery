@@ -10,6 +10,9 @@ import yaml
 @dataclass(frozen=True)
 class FeatureReportConfig:
     channels: list[str]
+    feature_variance_csv: Path | None = None
+    feature_variance_cluster: int | None = None
+    map2_feature_policy: str = "full"
 
 
 @dataclass(frozen=True)
@@ -69,7 +72,22 @@ def load_latent_report_config(path: str | Path) -> LatentReportConfig:
     config = LatentReportConfig(
         manifest_path=manifest_path,
         output_dir=output_dir,
-        features=FeatureReportConfig(channels=[str(v) for v in raw["features"]["channels"]]),
+        features=FeatureReportConfig(
+            channels=[str(v) for v in raw["features"]["channels"]],
+            feature_variance_csv=(
+                ((base_dir / Path(raw["features"]["feature_variance_csv"])).resolve()
+                 if not Path(raw["features"]["feature_variance_csv"]).is_absolute()
+                 else Path(raw["features"]["feature_variance_csv"]).resolve())
+                if raw["features"].get("feature_variance_csv") is not None
+                else None
+            ),
+            feature_variance_cluster=(
+                int(raw["features"]["feature_variance_cluster"])
+                if raw["features"].get("feature_variance_cluster") is not None
+                else None
+            ),
+            map2_feature_policy=str(raw["features"].get("map2_feature_policy", "full")).lower(),
+        ),
         dimensionality_reduction=ReductionConfig(n_pca_components=int(raw["dimensionality_reduction"]["n_pca_components"])),
         clustering=ClusteringConfig(
             method=str(raw["clustering"]["method"]).lower(),
@@ -93,3 +111,11 @@ def validate_latent_report_config(config: LatentReportConfig) -> None:
         raise ValueError("n_clusters must be greater than 1")
     if config.reporting.representatives_per_cluster <= 0:
         raise ValueError("representatives_per_cluster must be positive")
+    if (config.features.feature_variance_csv is None) != (config.features.feature_variance_cluster is None):
+        raise ValueError(
+            "features.feature_variance_csv and features.feature_variance_cluster must be provided together"
+        )
+    if config.features.feature_variance_csv is not None and not config.features.feature_variance_csv.exists():
+        raise ValueError(f"Feature variance CSV not found: {config.features.feature_variance_csv}")
+    if config.features.map2_feature_policy not in {"full", "prior_only"}:
+        raise ValueError("features.map2_feature_policy must be one of: full, prior_only")
