@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 import json
 import hashlib
+import re
+from inspect import getsource
 from time import perf_counter
 from pathlib import Path
 
@@ -17,14 +19,17 @@ matplotlib.use("Agg", force=True)
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.colors import to_rgba
 from scipy.cluster.hierarchy import fcluster, linkage
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
+from . import features as features_module
 from .feature_variance_analysis import run_feature_variance_analysis
 from .features import extract_engineered_features, load_patch_npz, load_patch_payload, slice_patch_payload
+from .preprocessing import scale_feature_matrix
 from .report_config import LatentReportConfig
 
 
@@ -87,10 +92,12 @@ def _categorize_feature_family(feature: str) -> str:
         "_eccentricity",
         "_circularity",
         "_compactness",
-        "_solidity",
+        "_boundary_irregularity",
         "_elongation",
+        "_roundness",
         "_radial_symmetry",
         "_log_response",
+        "_log_puncta_",
         "_dog_response",
         "_dominant_object_fraction",
     )
@@ -116,23 +123,133 @@ def _dataset_cache_dir(manifest_path: Path) -> Path:
     return manifest_path.parent.parent / "engineered_feature_cache"
 
 
-def _manifest_cache_fingerprint(manifest: pd.DataFrame, channels: list[str]) -> str:
-    key_columns = ["patch_id"]
-    for column in ("shard_path", "shard_index", "patch_path"):
-        if column in manifest.columns:
-            key_columns.append(column)
-    fingerprint_frame = manifest[key_columns].copy()
-    for column in fingerprint_frame.columns:
-        if fingerprint_frame[column].dtype == object:
-            fingerprint_frame[column] = fingerprint_frame[column].fillna("").astype(str)
-        else:
-            fingerprint_frame[column] = fingerprint_frame[column].fillna(-1)
-    row_hashes = pd.util.hash_pandas_object(fingerprint_frame, index=False).to_numpy(dtype=np.uint64)
+def _path_fingerprint(path: Path) -> dict[str, object]:
+    stat = path.stat()
+    return {
+        "path": str(path.resolve()),
+        "size_bytes": int(stat.st_size),
+        "mtime_ns": int(stat.st_mtime_ns),
+    }
+
+
+def _code_fingerprint() -> dict[str, str]:
     digest = hashlib.sha256()
-    digest.update(",".join(channels).encode("utf-8"))
-    digest.update(str(len(manifest)).encode("utf-8"))
-    digest.update(row_hashes.tobytes())
-    return digest.hexdigest()
+    digest.update(getsource(extract_engineered_features).encode("utf-8"))
+    module_path = Path(features_module.__file__).resolve()
+    digest.update(module_path.read_bytes())
+    return {
+        "extract_engineered_features_sha256": digest.hexdigest(),
+        "features_module_path": str(module_path),
+    }
+
+
+def _manifest_cache_inputs(manifest: pd.DataFrame, manifest_path: Path, channels: list[str]) -> dict[str, object]:
+    shard_entries: list[dict[str, object]] = []
+    if "shard_path" in manifest.columns:
+        shard_paths = sorted({str(path) for path in manifest["shard_path"].dropna().astype(str) if str(path)})
+        shard_entries = [_path_fingerprint(Path(path)) for path in shard_paths]
+
+    return {
+        "channels": [str(channel) for channel in channels],
+        "manifest": _path_fingerprint(manifest_path),
+        "rows": int(len(manifest)),
+        "patch_ids_sha256": hashlib.sha256(
+            "\n".join(manifest["patch_id"].astype(str).tolist()).encode("utf-8")
+        ).hexdigest(),
+        "shards": shard_entries,
+        "code": _code_fingerprint(),
+    }
+
+
+def _manifest_cache_fingerprint_from_inputs(cache_inputs: dict[str, object]) -> str:
+    return hashlib.sha256(
+        json.dumps(cache_inputs, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+
+def _effective_engineered_feature_channels(channels: list[str], map2_feature_policy: str) -> list[str]:
+    effective = [str(channel) for channel in channels]
+    if str(map2_feature_policy).lower() in {"prior_only", "exclude_all_map2", "mask_internal_only"}:
+        effective = [channel for channel in effective if channel != "MAP2"]
+    return effective
+
+
+def _display_channels(channels: list[str], map2_feature_policy: str) -> list[str]:
+    display = [str(channel) for channel in channels]
+    if str(map2_feature_policy).lower() == "mask_internal_only":
+        display = [channel for channel in display if channel != "MAP2"]
+    return display
+
+
+def _apply_channel_scope_filter(
+    *,
+    feature_columns: list[str],
+    allowed_channels: list[str],
+    output_dir: Path,
+) -> tuple[list[str], dict[str, int | str], pd.DataFrame]:
+    normalized_allowed = [str(channel).upper() for channel in allowed_channels if str(channel).upper() != "MAP2"]
+    if not normalized_allowed:
+        raise ValueError("Channel scope filter requires at least one non-MAP2 allowed channel.")
+
+    channel_tokens = ("MAP2", "FLAG", "HA", "SHANK2")
+    channel_pattern = re.compile(r"(?<![a-z0-9])(map2|flag|ha|shank2)(?![a-z0-9])")
+    allowed_tokens = {channel.lower() for channel in normalized_allowed}
+    audit_rows: list[dict[str, object]] = []
+    kept_columns: list[str] = []
+
+    for feature in feature_columns:
+        feature_lower = str(feature).lower()
+        referenced_channels = [match.group(1).upper() for match in channel_pattern.finditer(feature_lower)]
+        referenced_token_set = {token.lower() for token in referenced_channels}
+        if not referenced_token_set:
+            keep = False
+            policy_reason = "excluded_non_channel_scoped"
+        elif referenced_token_set.issubset(allowed_tokens):
+            keep = True
+            policy_reason = "kept"
+            kept_columns.append(feature)
+        else:
+            keep = False
+            policy_reason = "excluded_out_of_scope_channel"
+
+        audit_rows.append(
+            {
+                "feature": feature,
+                "allowed_channels": ",".join(normalized_allowed),
+                "referenced_channels": ",".join(referenced_channels),
+                "kept": keep,
+                "policy_reason": policy_reason,
+            }
+        )
+
+    audit_df = pd.DataFrame.from_records(audit_rows).sort_values(["kept", "feature"], ascending=[True, True])
+    audit_df.to_csv(output_dir / "channel_scope_audit.csv", index=False)
+
+    total = len(feature_columns)
+    kept = len(kept_columns)
+    excluded = total - kept
+    excluded_out_of_scope = int((audit_df["policy_reason"] == "excluded_out_of_scope_channel").sum())
+    excluded_non_channel_scoped = int((audit_df["policy_reason"] == "excluded_non_channel_scoped").sum())
+    summary = {
+        "channel_scope_allowed_channels": ",".join(normalized_allowed),
+        "channel_scope_total_features": total,
+        "channel_scope_kept_features": kept,
+        "channel_scope_excluded_features": excluded,
+        "channel_scope_excluded_out_of_scope_channel": excluded_out_of_scope,
+        "channel_scope_excluded_non_channel_scoped": excluded_non_channel_scoped,
+    }
+    summary_lines = [
+        "# Channel Scope Filter",
+        "",
+        f"- allowed_channels: `{', '.join(normalized_allowed)}`",
+        f"- total_candidate_features: `{total}`",
+        f"- kept_after_channel_scope: `{kept}`",
+        f"- excluded_after_channel_scope: `{excluded}`",
+        f"- excluded_out_of_scope_channel: `{excluded_out_of_scope}`",
+        f"- excluded_non_channel_scoped: `{excluded_non_channel_scoped}`",
+    ]
+    (output_dir / "channel_scope_summary.md").write_text("\n".join(summary_lines) + "\n", encoding="utf-8")
+    return kept_columns, summary, audit_df
 
 
 def _load_or_compute_engineered_features(
@@ -140,6 +257,7 @@ def _load_or_compute_engineered_features(
     manifest: pd.DataFrame,
     manifest_path: Path,
     channels: list[str],
+    map2_feature_policy: str,
 ) -> tuple[pd.DataFrame, dict[str, object]]:
     cache_dir = _dataset_cache_dir(manifest_path)
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -147,7 +265,12 @@ def _load_or_compute_engineered_features(
     parquet_path = cache_dir / "engineered_features.parquet"
     csv_path = cache_dir / "engineered_features.csv"
 
-    cache_key = _manifest_cache_fingerprint(manifest=manifest, channels=channels)
+    effective_channels = _effective_engineered_feature_channels(
+        channels=channels,
+        map2_feature_policy=map2_feature_policy,
+    )
+    cache_inputs = _manifest_cache_inputs(manifest=manifest, manifest_path=manifest_path, channels=effective_channels)
+    cache_key = _manifest_cache_fingerprint_from_inputs(cache_inputs)
     expected_patch_ids = manifest["patch_id"].astype(str).tolist()
 
     if metadata_path.exists():
@@ -160,13 +283,15 @@ def _load_or_compute_engineered_features(
             cached_key = str(metadata.get("cache_key", ""))
             cached_rows = int(metadata.get("rows", -1))
             cached_channels = [str(v) for v in metadata.get("channels", [])]
+            cached_inputs = metadata.get("cache_inputs")
             cache_file = parquet_path if fmt == "parquet" else csv_path if fmt == "csv" else None
             if (
                 cache_file is not None
                 and cache_file.exists()
                 and cached_key == cache_key
                 and cached_rows == len(manifest)
-                and cached_channels == [str(v) for v in channels]
+                and cached_channels == [str(v) for v in effective_channels]
+                and cached_inputs == cache_inputs
             ):
                 start = perf_counter()
                 if fmt == "parquet":
@@ -188,7 +313,7 @@ def _load_or_compute_engineered_features(
                 print("[latent] engineered feature cache mismatch on patch ordering; recomputing features.")
 
     start = perf_counter()
-    feature_df = extract_engineered_features(manifest=manifest, channels=channels)
+    feature_df = extract_engineered_features(manifest=manifest, channels=effective_channels)
     elapsed = perf_counter() - start
     fmt = "parquet"
     try:
@@ -203,8 +328,9 @@ def _load_or_compute_engineered_features(
 
     metadata = {
         "cache_key": cache_key,
+        "cache_inputs": cache_inputs,
         "manifest_path": str(manifest_path.resolve()),
-        "channels": [str(v) for v in channels],
+        "channels": [str(v) for v in effective_channels],
         "rows": int(len(feature_df)),
         "columns": [str(v) for v in feature_df.columns.tolist()],
         "format": fmt,
@@ -234,12 +360,29 @@ def _apply_map2_feature_policy(
         "distance_to_mask_boundary_px",
         "map2_local_thickness_proxy",
     }
+    map2_spatial_tokens = (
+        "_inside_mean",
+        "_outside_mean",
+        "_inside_outside_ratio",
+        "_inside_bright_fraction",
+        "_outside_bright_fraction",
+        "_inside_bright_outside_bright_ratio",
+        "map2_mask_fraction",
+        "distance_to_mask_boundary_px",
+        "center_of_patch_map2_intensity",
+        "map2_local_thickness_proxy",
+        "_center_surround_",
+    )
+    mask_context_tokens = map2_spatial_tokens + ("_pixel_corr_in_mask",)
     audit_rows: list[dict[str, object]] = []
     kept_columns: list[str] = []
 
     for feature in feature_columns:
         feature_lower = feature.lower()
         contains_map2 = "map2" in feature_lower
+        is_map2_spatial = any(token in feature_lower for token in map2_spatial_tokens)
+        is_mask_context = any(token in feature_lower for token in mask_context_tokens)
+        is_posthoc_map2_dendrite = feature_lower.startswith("posthoc_map2_")
         keep = True
         policy_reason = "kept"
 
@@ -250,6 +393,37 @@ def _apply_map2_feature_policy(
             elif contains_map2:
                 keep = False
                 policy_reason = "excluded_map2_as_signal"
+        elif policy == "exclude_spatial":
+            if is_map2_spatial:
+                keep = False
+                policy_reason = "excluded_map2_spatial"
+        elif policy == "exclude_spatial_and_dendrite":
+            if is_map2_spatial:
+                keep = False
+                policy_reason = "excluded_map2_spatial"
+            elif is_posthoc_map2_dendrite:
+                keep = False
+                policy_reason = "excluded_posthoc_map2_dendrite"
+        elif policy == "exclude_all_map2":
+            if contains_map2:
+                keep = False
+                policy_reason = "excluded_all_map2_signal"
+            elif is_map2_spatial:
+                keep = False
+                policy_reason = "excluded_map2_spatial"
+            elif is_posthoc_map2_dendrite:
+                keep = False
+                policy_reason = "excluded_posthoc_map2_dendrite"
+        elif policy == "mask_internal_only":
+            if contains_map2:
+                keep = False
+                policy_reason = "excluded_all_map2_signal"
+            elif is_mask_context:
+                keep = False
+                policy_reason = "excluded_mask_context"
+            elif is_posthoc_map2_dendrite:
+                keep = False
+                policy_reason = "excluded_posthoc_map2_dendrite"
 
         if keep:
             kept_columns.append(feature)
@@ -258,6 +432,9 @@ def _apply_map2_feature_policy(
             {
                 "feature": feature,
                 "contains_map2_token": contains_map2,
+                "is_map2_spatial": is_map2_spatial,
+                "is_mask_context": is_mask_context,
+                "is_posthoc_map2_dendrite": is_posthoc_map2_dendrite,
                 "policy": policy,
                 "kept": keep,
                 "policy_reason": policy_reason,
@@ -271,12 +448,20 @@ def _apply_map2_feature_policy(
     kept = len(kept_columns)
     excluded = total - kept
     excluded_map2_signal = int((audit_df["policy_reason"] == "excluded_map2_as_signal").sum())
+    excluded_all_map2_signal = int((audit_df["policy_reason"] == "excluded_all_map2_signal").sum())
+    excluded_map2_spatial = int((audit_df["policy_reason"] == "excluded_map2_spatial").sum())
+    excluded_mask_context = int((audit_df["policy_reason"] == "excluded_mask_context").sum())
+    excluded_posthoc_map2_dendrite = int((audit_df["policy_reason"] == "excluded_posthoc_map2_dendrite").sum())
     summary = {
         "map2_feature_policy": policy,
         "map2_policy_total_features": total,
         "map2_policy_kept_features": kept,
         "map2_policy_excluded_features": excluded,
         "map2_policy_excluded_map2_as_signal": excluded_map2_signal,
+        "map2_policy_excluded_all_map2_signal": excluded_all_map2_signal,
+        "map2_policy_excluded_map2_spatial": excluded_map2_spatial,
+        "map2_policy_excluded_mask_context": excluded_mask_context,
+        "map2_policy_excluded_posthoc_map2_dendrite": excluded_posthoc_map2_dendrite,
     }
     summary_lines = [
         "# MAP2 Feature Policy",
@@ -286,6 +471,10 @@ def _apply_map2_feature_policy(
         f"- kept_after_policy: `{kept}`",
         f"- excluded_after_policy: `{excluded}`",
         f"- excluded_map2_as_signal: `{excluded_map2_signal}`",
+        f"- excluded_all_map2_signal: `{excluded_all_map2_signal}`",
+        f"- excluded_map2_spatial: `{excluded_map2_spatial}`",
+        f"- excluded_mask_context: `{excluded_mask_context}`",
+        f"- excluded_posthoc_map2_dendrite: `{excluded_posthoc_map2_dendrite}`",
     ]
     if policy == "prior_only":
         summary_lines.extend(
@@ -300,10 +489,81 @@ def _apply_map2_feature_policy(
                 "- excluded all other features containing `map2` in the feature name",
             ]
         )
+    elif policy == "exclude_spatial":
+        summary_lines.extend(
+            [
+                "",
+                "## Exclude-Spatial Rules",
+                "",
+                "- excluded the MAP2-aware spatial family:",
+                "  - inside/outside features",
+                "  - center/surround features",
+                "  - `map2_mask_fraction`",
+                "  - `distance_to_mask_boundary_px`",
+                "  - `center_of_patch_map2_intensity`",
+                "  - `map2_local_thickness_proxy`",
+                "- kept other MAP2-derived features such as intensity, texture, morphology, and z-profile features",
+            ]
+        )
+    elif policy == "exclude_spatial_and_dendrite":
+        summary_lines.extend(
+            [
+                "",
+                "## Exclude-Spatial-And-Dendrite Rules",
+                "",
+                "- excluded the MAP2-aware spatial family:",
+                "  - inside/outside features",
+                "  - center/surround features",
+                "  - `map2_mask_fraction`",
+                "  - `distance_to_mask_boundary_px`",
+                "  - `center_of_patch_map2_intensity`",
+                "  - `map2_local_thickness_proxy`",
+                "- excluded post-hoc MAP2 dendrite geometry features:",
+                "  - `posthoc_map2_*`",
+                "- kept other MAP2-derived features such as intensity, texture, morphology, and z-profile features",
+            ]
+        )
+    elif policy == "exclude_all_map2":
+        summary_lines.extend(
+            [
+                "",
+                "## Exclude-All-MAP2 Rules",
+                "",
+                "- excluded all features containing `map2` in the feature name",
+                "- excluded the MAP2-aware spatial family even when the feature name does not itself contain `map2`:",
+                "  - inside/outside features",
+                "  - center/surround features",
+                "- excluded post-hoc MAP2 dendrite geometry features:",
+                "  - `posthoc_map2_*`",
+                "- the MAP2 mask can still be used internally for patch extraction and mask-aware calculations, but no MAP2-derived signal features are kept in the modeling feature set",
+            ]
+        )
+    elif policy == "mask_internal_only":
+        summary_lines.extend(
+            [
+                "",
+                "## Mask-Internal-Only Rules",
+                "",
+                "- excluded all features containing `map2` in the feature name",
+                "- excluded all mask-context analysis features:",
+                "  - inside/outside features",
+                "  - center/surround features",
+                "  - `map2_mask_fraction`",
+                "  - `distance_to_mask_boundary_px`",
+                "  - `center_of_patch_map2_intensity`",
+                "  - `map2_local_thickness_proxy`",
+                "  - `*_pixel_corr_in_mask`",
+                "- excluded post-hoc MAP2 dendrite geometry features:",
+                "  - `posthoc_map2_*`",
+                "- the MAP2 mask is retained only for internal sampling/extraction logic and is not represented in the modeling feature set",
+            ]
+        )
     (output_dir / "map2_feature_policy_summary.md").write_text("\n".join(summary_lines) + "\n", encoding="utf-8")
     print(
         f"[latent] MAP2 feature policy | policy={policy} | kept={kept}/{total} "
-        f"| excluded_map2_as_signal={excluded_map2_signal}"
+        f"| excluded_map2_as_signal={excluded_map2_signal} | excluded_all_map2_signal={excluded_all_map2_signal} "
+        f"| excluded_map2_spatial={excluded_map2_spatial} | excluded_mask_context={excluded_mask_context} "
+        f"| excluded_posthoc_map2_dendrite={excluded_posthoc_map2_dendrite}"
     )
     return kept_columns, summary, audit_df
 
@@ -488,13 +748,57 @@ def _save_pca_plot(output_dir: Path, report_df: pd.DataFrame) -> None:
     plt.close(fig)
 
 
+def _layer_alpha(index: int, total: int, *, bottom_alpha: float = 0.7, top_alpha: float = 0.35) -> float:
+    total = max(int(total), 1)
+    if total == 1:
+        return float(bottom_alpha)
+    frac = float(index) / float(total - 1)
+    return float(bottom_alpha + frac * (top_alpha - bottom_alpha))
+
+
+def _ordered_condition_levels(levels: list[str]) -> list[str]:
+    ordered = []
+    if "positive" in levels:
+        ordered.append("positive")
+    remaining = sorted(level for level in levels if level not in {"positive", "negative"})
+    ordered.extend(remaining)
+    if "negative" in levels:
+        ordered.append("negative")
+    return ordered
+
+
+def _scatter_category_layer(
+    ax,
+    x,
+    y,
+    *,
+    color: str,
+    label: str,
+    layer_index: int,
+    layer_total: int,
+    size: float = 10.0,
+) -> None:
+    edge_alpha = _layer_alpha(layer_index, layer_total, bottom_alpha=0.85, top_alpha=0.55)
+    face_alpha = _layer_alpha(layer_index, layer_total, bottom_alpha=0.22, top_alpha=0.08)
+    ax.scatter(
+        x,
+        y,
+        s=size,
+        label=label,
+        facecolors=to_rgba(color, face_alpha),
+        edgecolors=to_rgba(color, edge_alpha),
+        linewidths=0.35,
+        rasterized=True,
+    )
+
+
 def _save_latent_structure_interpretation(output_dir: Path, report_df: pd.DataFrame) -> None:
     interpretation_dir = output_dir / "latent_structure_interpretation"
     interpretation_dir.mkdir(parents=True, exist_ok=True)
 
     eps = 1e-6
     total_patches = len(report_df)
-    condition_levels = sorted(report_df["condition"].dropna().astype(str).unique().tolist())
+    condition_levels = _ordered_condition_levels(report_df["condition"].dropna().astype(str).unique().tolist())
     patch_group_levels = sorted(report_df["patch_group"].dropna().astype(str).unique().tolist())
 
     overall_condition_counts = report_df["condition"].value_counts(dropna=False)
@@ -587,17 +891,19 @@ def _save_latent_structure_interpretation(output_dir: Path, report_df: pd.DataFr
         "positive": "#E45756",
     }
     fig, ax = plt.subplots(figsize=(8, 6))
-    for condition in condition_levels:
+    for idx, condition in enumerate(condition_levels):
         subset = report_df[report_df["condition"].astype(str) == condition]
         if subset.empty:
             continue
-        ax.scatter(
+        _scatter_category_layer(
+            ax,
             subset["pca_1"],
             subset["pca_2"],
-            s=16,
-            alpha=0.6,
+            size=9,
             label=condition,
             color=condition_palette.get(condition, "#9D9DA1"),
+            layer_index=idx,
+            layer_total=len(condition_levels),
         )
     ax.set_xlabel("PCA 1")
     ax.set_ylabel("PCA 2")
@@ -615,17 +921,19 @@ def _save_latent_structure_interpretation(output_dir: Path, report_df: pd.DataFr
         "far_background": "#B279A2",
     }
     fig, ax = plt.subplots(figsize=(8, 6))
-    for patch_group in patch_group_levels:
+    for idx, patch_group in enumerate(patch_group_levels):
         subset = report_df[report_df["patch_group"].astype(str) == patch_group]
         if subset.empty:
             continue
-        ax.scatter(
+        _scatter_category_layer(
+            ax,
             subset["pca_1"],
             subset["pca_2"],
-            s=16,
-            alpha=0.6,
+            size=9,
             label=patch_group,
             color=patch_group_palette.get(patch_group, "#9D9DA1"),
+            layer_index=idx,
+            layer_total=len(patch_group_levels),
         )
     ax.set_xlabel("PCA 1")
     ax.set_ylabel("PCA 2")
@@ -641,17 +949,19 @@ def _save_latent_structure_interpretation(output_dir: Path, report_df: pd.DataFr
         if subset_group.empty:
             continue
         fig, ax = plt.subplots(figsize=(8, 6))
-        for condition in condition_levels:
+        for idx, condition in enumerate(condition_levels):
             subset = subset_group[subset_group["condition"].astype(str) == condition]
             if subset.empty:
                 continue
-            ax.scatter(
+            _scatter_category_layer(
+                ax,
                 subset["pca_1"],
                 subset["pca_2"],
-                s=18,
-                alpha=0.65,
+                size=10,
                 label=condition,
                 color=condition_palette.get(condition, "#9D9DA1"),
+                layer_index=idx,
+                layer_total=len(condition_levels),
             )
         ax.set_xlabel("PCA 1")
         ax.set_ylabel("PCA 2")
@@ -1163,6 +1473,7 @@ def _save_representative_gallery(
     report_df: pd.DataFrame,
     representatives: dict[int, list[int]],
     channel_display_ranges: dict[str, tuple[float, float]],
+    channels: list[str],
     *,
     filename_prefix: str = "cluster",
     title_prefix: str = "Cluster",
@@ -1170,11 +1481,15 @@ def _save_representative_gallery(
     gallery_dir = output_dir / "representatives"
     gallery_dir.mkdir(parents=True, exist_ok=True)
     shard_cache: dict[str, dict[str, np.ndarray]] = {}
+    if not channels:
+        return
 
     for cluster_id, indices in representatives.items():
-        fig, axes = plt.subplots(len(indices), 4, figsize=(12, max(3, len(indices) * 2.5)))
+        fig, axes = plt.subplots(len(indices), len(channels), figsize=(3 * len(channels), max(3, len(indices) * 2.5)))
         if len(indices) == 1:
             axes = np.expand_dims(axes, axis=0)
+        if len(channels) == 1:
+            axes = np.asarray(axes).reshape(len(indices), 1)
 
         for row_idx, report_index in enumerate(indices):
             row = report_df.iloc[report_index]
@@ -1187,7 +1502,7 @@ def _save_representative_gallery(
                 payload = slice_patch_payload(shard_cache[shard_key], int(shard_index))
             else:
                 payload = load_patch_payload(row)
-            for col_idx, channel in enumerate(["MAP2", "FLAG", "HA", "SHANK2"]):
+            for col_idx, channel in enumerate(channels):
                 ax = axes[row_idx, col_idx]
                 key = f"channel_{channel}"
                 if key in payload:
@@ -1278,6 +1593,7 @@ def run_latent_report(config: LatentReportConfig) -> Path:
         manifest=manifest,
         manifest_path=config.manifest_path,
         channels=config.features.channels,
+        map2_feature_policy=config.features.map2_feature_policy,
     )
     print(
         f"[latent] features ready | rows={len(feature_df)} | cols={feature_df.shape[1]} "
@@ -1286,6 +1602,10 @@ def run_latent_report(config: LatentReportConfig) -> Path:
     stage_start = perf_counter()
     report_df = manifest.merge(feature_df, on="patch_id", how="inner")
     print(f"[latent] merged feature table | rows={len(report_df)} | elapsed={perf_counter()-stage_start:.1f}s")
+    effective_channels = _effective_engineered_feature_channels(
+        channels=config.features.channels,
+        map2_feature_policy=config.features.map2_feature_policy,
+    )
 
     feature_columns = [column for column in feature_df.columns if column != "patch_id"]
     if config.features.feature_variance_csv is not None:
@@ -1308,6 +1628,21 @@ def run_latent_report(config: LatentReportConfig) -> Path:
             f"[latent] feature variance filter | cluster={config.features.feature_variance_cluster} "
             f"| selected={len(feature_columns)} | elapsed={perf_counter()-stage_start:.1f}s"
         )
+
+    stage_start = perf_counter()
+    feature_columns, channel_scope_summary, channel_scope_audit_df = _apply_channel_scope_filter(
+        feature_columns=feature_columns,
+        allowed_channels=effective_channels,
+        output_dir=output_dir,
+    )
+    if not feature_columns:
+        raise ValueError(
+            "All candidate features were excluded by the channel scope filter before the MAP2 feature policy."
+        )
+    print(
+        f"[latent] channel scope applied | allowed={','.join([str(v) for v in effective_channels if str(v) != 'MAP2'])} "
+        f"| kept={len(feature_columns)} | elapsed={perf_counter()-stage_start:.1f}s"
+    )
 
     stage_start = perf_counter()
     feature_columns, map2_policy_summary, map2_policy_audit_df = _apply_map2_feature_policy(
@@ -1335,9 +1670,11 @@ def run_latent_report(config: LatentReportConfig) -> Path:
 
     stage_start = perf_counter()
     feature_matrix = report_df[feature_columns].to_numpy(dtype=np.float64)
-    scaler = StandardScaler()
-    scaled = scaler.fit_transform(feature_matrix)
-    print(f"[latent] scaling complete | matrix_shape={scaled.shape} | elapsed={perf_counter()-stage_start:.1f}s")
+    scaled = scale_feature_matrix(feature_matrix, config.preprocessing.scaler)
+    print(
+        f"[latent] scaling complete | scaler={config.preprocessing.scaler} "
+        f"| matrix_shape={scaled.shape} | elapsed={perf_counter()-stage_start:.1f}s"
+    )
 
     stage_start = perf_counter()
     n_components = min(config.dimensionality_reduction.n_pca_components, scaled.shape[1], max(2, scaled.shape[0] - 1))
@@ -1421,7 +1758,11 @@ def run_latent_report(config: LatentReportConfig) -> Path:
     )
     print(f"[latent] feature variance analysis complete | elapsed={perf_counter()-stage_start:.1f}s")
     stage_start = perf_counter()
-    channel_display_ranges = _compute_channel_display_ranges(report_df=report_df, channels=config.features.channels)
+    display_channels = _display_channels(
+        channels=config.features.channels,
+        map2_feature_policy=config.features.map2_feature_policy,
+    )
+    channel_display_ranges = _compute_channel_display_ranges(report_df=report_df, channels=display_channels)
     pd.DataFrame.from_records(
         [
             {"channel": channel, "display_min": bounds[0], "display_max": bounds[1]}
@@ -1475,6 +1816,7 @@ def run_latent_report(config: LatentReportConfig) -> Path:
         report_df=report_df,
         representatives=central_representatives,
         channel_display_ranges=channel_display_ranges,
+        channels=display_channels,
         filename_prefix="cluster_central",
         title_prefix="Cluster",
     )
@@ -1483,6 +1825,7 @@ def run_latent_report(config: LatentReportConfig) -> Path:
         report_df=report_df,
         representatives=extreme_representatives,
         channel_display_ranges=channel_display_ranges,
+        channels=display_channels,
         filename_prefix="cluster_extreme",
         title_prefix="Cluster",
     )

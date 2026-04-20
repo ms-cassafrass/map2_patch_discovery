@@ -1,5 +1,5 @@
-dataset_name: map2_roi_3_20_26_all_samples
-output_dir: outputs/map2_roi_3_20_26_all_samples
+dataset_name: map2_blob_ha_3_20_26_all_samples
+output_dir: outputs/map2_blob_ha_3_20_26_all_samples
 patch:
   width_px: 32
   height_px: 32
@@ -20,6 +20,14 @@ sampling:
   near_outside_distance_px: 24
   far_background_min_distance_px: 48
   random_seed: 42
+  mode: detected_blobs
+  blob_channels:
+  - HA
+  blob_min_sigma_px: 0.75
+  blob_max_sigma_px: 3.5
+  blob_num_sigma: 6
+  blob_threshold: 0.03
+  blob_overlap: 0.5
 cohort:
   channel_schema: map2_flag_ha_shank2_v1
   required_channels:

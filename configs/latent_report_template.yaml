@@ -11,6 +11,9 @@ features:
 dimensionality_reduction:
   n_pca_components: 8
 
+preprocessing:
+  scaler: standard
+
 clustering:
   method: gmm
   n_clusters: 8

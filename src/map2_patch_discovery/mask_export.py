@@ -15,7 +15,6 @@ class MaskExportConfig:
     input_path: Path
     output_dir: Path
     channel: int = 0
-    time: int = 0
     save_debug_png: bool = True
     mip_mask_method: str = "hysteresis"
     mip_mask_high_percentile: float = 99.5

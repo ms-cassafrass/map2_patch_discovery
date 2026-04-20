@@ -86,10 +86,14 @@ def open_ome_image(path: str | Path, channel_names: list[str] | None = None) -> 
     pixel_size_xy_um, pixel_size_z_um = _read_pixel_sizes(path)
 
     if zarr is not None:
-        with tifffile.TiffFile(path) as tf:
-            store = tf.series[0].aszarr()
-            data = zarr.open(store, mode="r")
-        is_lazy = True
+        try:
+            with tifffile.TiffFile(path) as tf:
+                store = tf.series[0].aszarr()
+                data = zarr.open(store, mode="r")
+            is_lazy = True
+        except (TypeError, AttributeError, ValueError):
+            data = tifffile.imread(path)
+            is_lazy = False
     else:
         data = tifffile.imread(path)
         is_lazy = False

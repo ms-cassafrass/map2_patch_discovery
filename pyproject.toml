@@ -17,6 +17,16 @@ dependencies = [
   "scipy>=1.11",
   "scikit-learn>=1.5",
   "matplotlib>=3.8",
+  "scikit-image>=0.22",
+  "PyWavelets>=1.5",
+  "pyarrow>=16.0",
+]
+
+[project.optional-dependencies]
+full = [
+  "scikit-image>=0.22",
+  "PyWavelets>=1.5",
+  "pyarrow>=16.0",
 ]
 
 [project.scripts]
@@ -26,6 +36,9 @@ map2-mask-export = "map2_patch_discovery.mask_cli:main"
 map2-mask-batch = "map2_patch_discovery.mask_batch_cli:main"
 map2-feature-variance = "map2_patch_discovery.feature_variance_cli:main"
 map2-feature-variance-batch = "map2_patch_discovery.feature_variance_batch_cli:main"
+map2-pca-variance = "map2_patch_discovery.pca_variance_cli:main"
+map2-posthoc-feature-analysis = "map2_patch_discovery.posthoc_feature_analysis_cli:main"
+map2-pc-overlay = "map2_patch_discovery.pc_overlay_cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

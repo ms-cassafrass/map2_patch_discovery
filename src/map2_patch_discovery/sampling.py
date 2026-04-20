@@ -15,6 +15,8 @@ class PatchCenter:
     group: str
     distance_to_mask_px: float
     map2_overlap_fraction: float
+    detection_channel: str | None = None
+    detected_radius_px: float | None = None
 
 
 def _valid_center_region(mask_shape: tuple[int, int], patch: PatchConfig) -> np.ndarray:
@@ -41,15 +43,68 @@ def _patch_overlap(mask: np.ndarray, y: int, x: int, patch: PatchConfig) -> floa
     return float(np.mean(crop))
 
 
+def compute_signed_distance(mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    inside_dist = distance_transform_edt(mask)
+    outside_dist = distance_transform_edt(~mask)
+    signed_distance = inside_dist.astype(np.float32)
+    signed_distance[~mask] = -outside_dist[~mask].astype(np.float32)
+    return signed_distance, outside_dist.astype(np.float32)
+
+
+def classify_patch_center(
+    *,
+    mask: np.ndarray,
+    patch: PatchConfig,
+    sampling: SamplingConfig,
+    y: int,
+    x: int,
+    detection_channel: str | None = None,
+    detected_radius_px: float | None = None,
+    signed_distance: np.ndarray | None = None,
+    outside_distance: np.ndarray | None = None,
+) -> PatchCenter | None:
+    valid = _valid_center_region(mask.shape, patch)
+    if not valid[int(y), int(x)]:
+        return None
+
+    if signed_distance is None or outside_distance is None:
+        signed_distance, outside_distance = compute_signed_distance(mask)
+    signed_value = float(signed_distance[int(y), int(x)])
+    outside_value = float(outside_distance[int(y), int(x)])
+    in_mask = bool(mask[int(y), int(x)])
+
+    if in_mask and signed_value > float(sampling.boundary_width_px):
+        group = "in_mask"
+    elif abs(signed_value) <= float(sampling.boundary_width_px):
+        group = "boundary"
+    elif (not in_mask) and outside_value > float(sampling.boundary_width_px) and outside_value <= float(sampling.near_outside_distance_px):
+        group = "near_mask_outside"
+    elif (not in_mask) and outside_value >= float(sampling.far_background_min_distance_px):
+        group = "far_background"
+    else:
+        return None
+
+    if group not in sampling.groups:
+        return None
+
+    overlap = _patch_overlap(mask, int(y), int(x), patch)
+    return PatchCenter(
+        x=int(x),
+        y=int(y),
+        group=group,
+        distance_to_mask_px=signed_value,
+        map2_overlap_fraction=overlap,
+        detection_channel=detection_channel,
+        detected_radius_px=detected_radius_px,
+    )
+
+
 def sample_patch_centers(mask: np.ndarray, patch: PatchConfig, sampling: SamplingConfig) -> list[PatchCenter]:
     if mask.ndim != 2:
         raise ValueError(f"MAP2 mask must be 2D for phase 1 sampling, got {mask.ndim}D")
 
     valid = _valid_center_region(mask.shape, patch)
-    inside_dist = distance_transform_edt(mask)
-    outside_dist = distance_transform_edt(~mask)
-    signed_distance = inside_dist.astype(np.float32)
-    signed_distance[~mask] = -outside_dist[~mask].astype(np.float32)
+    signed_distance, outside_dist = compute_signed_distance(mask)
 
     boundary = np.abs(signed_distance) <= float(sampling.boundary_width_px)
     in_mask = mask & (signed_distance > float(sampling.boundary_width_px))

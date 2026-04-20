@@ -1,0 +1,24 @@
+manifest_path: outputs/map2_roi_3_20_26_all_samples/manifests/map2_roi_3_20_26_all_samples_patch_manifest.csv
+output_dir: outputs/map2_roi_3_20_26_all_samples/latent_report_variance_thresholded_mask_internal_only_robust
+
+features:
+  channels:
+    - MAP2
+    - FLAG
+    - HA
+    - SHANK2
+  map2_feature_policy: mask_internal_only
+
+dimensionality_reduction:
+  n_pca_components: 8
+
+preprocessing:
+  scaler: robust
+
+clustering:
+  method: gmm
+  n_clusters: 8
+  random_seed: 42
+
+reporting:
+  representatives_per_cluster: 12

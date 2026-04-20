@@ -1,0 +1,16 @@
+# Core runtime
+numpy>=1.26
+pandas>=2.2
+PyYAML>=6.0
+tifffile>=2024.2.12
+zarr>=2.18
+scipy>=1.11
+scikit-learn>=1.5
+matplotlib>=3.8
+
+# Optional feature-engineering dependencies used by the codebase
+scikit-image>=0.22
+PyWavelets>=1.5
+
+# Performance / file-format support
+pyarrow>=16.0

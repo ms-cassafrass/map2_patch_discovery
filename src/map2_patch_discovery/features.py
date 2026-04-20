@@ -10,8 +10,9 @@ from scipy.signal import find_peaks
 from scipy.stats import kurtosis, skew
 
 try:  # pragma: no cover - optional dependency
-    from skimage.feature import graycomatrix, graycoprops, local_binary_pattern
+    from skimage.feature import blob_log, graycomatrix, graycoprops, local_binary_pattern
 except ImportError:  # pragma: no cover
+    blob_log = None
     graycomatrix = None
     graycoprops = None
     local_binary_pattern = None
@@ -126,8 +127,9 @@ def _component_geometry(binary: np.ndarray, intensity_image: np.ndarray) -> dict
             "eccentricity": 0.0,
             "circularity": 0.0,
             "compactness": 0.0,
-            "solidity": 0.0,
+            "boundary_irregularity": 0.0,
             "elongation": 0.0,
+            "roundness": 0.0,
             "radial_symmetry": 0.0,
             "microstructure_density": 0.0,
             "dominant_object_fraction": 0.0,
@@ -144,6 +146,8 @@ def _component_geometry(binary: np.ndarray, intensity_image: np.ndarray) -> dict
     cx = float(np.mean(xs))
     y_centered = ys - cy
     x_centered = xs - cx
+    major = 0.0
+    minor = 0.0
     if ys.size >= 2:
         cov = np.cov(np.vstack([y_centered, x_centered]))
         evals = np.sort(np.maximum(np.linalg.eigvalsh(cov), 0.0))
@@ -157,7 +161,6 @@ def _component_geometry(binary: np.ndarray, intensity_image: np.ndarray) -> dict
 
     perimeter = float(np.sum(binary ^ binary_erosion(binary)))
     circularity = float((4.0 * np.pi * total_area) / max(perimeter**2, 1.0))
-    compactness = circularity
 
     if convex_hull_image is not None:
         hull_area = float(np.sum(convex_hull_image(largest)))
@@ -165,7 +168,10 @@ def _component_geometry(binary: np.ndarray, intensity_image: np.ndarray) -> dict
         y0, y1 = int(np.min(ys)), int(np.max(ys)) + 1
         x0, x1 = int(np.min(xs)), int(np.max(xs)) + 1
         hull_area = float(max((y1 - y0) * (x1 - x0), 1))
-    solidity = _safe_ratio(largest_area, hull_area)
+    compactness = _safe_ratio(largest_area, hull_area)
+    boundary_irregularity = _safe_ratio(perimeter**2, largest_area)
+    equivalent_diameter = float(np.sqrt((4.0 * largest_area) / np.pi)) if largest_area > 0.0 else 0.0
+    roundness = _safe_ratio(equivalent_diameter, 2.0 * major) if major > 0.0 else 0.0
 
     img = np.asarray(intensity_image, dtype=np.float32)
     coords_y, coords_x = np.indices(img.shape, dtype=np.float32)
@@ -180,8 +186,9 @@ def _component_geometry(binary: np.ndarray, intensity_image: np.ndarray) -> dict
         "eccentricity": float(eccentricity),
         "circularity": float(circularity),
         "compactness": float(compactness),
-        "solidity": float(solidity),
+        "boundary_irregularity": float(boundary_irregularity),
         "elongation": float(elongation),
+        "roundness": float(roundness),
         "radial_symmetry": float(radial_symmetry),
         "microstructure_density": _safe_ratio(float(n), float(binary.size)),
         "dominant_object_fraction": _safe_ratio(largest_area, total_area),
@@ -240,6 +247,154 @@ def _wavelet_like_features(img: np.ndarray) -> dict[str, float]:
         "wavelet_energy_scale_2": float(np.mean((blur1 - blur2) ** 2)),
         "wavelet_energy_scale_3": float(np.mean((blur2 - blur4) ** 2)),
     }
+
+
+def _summarize_blob_metric(values: list[float], prefix: str) -> dict[str, float]:
+    finite = np.asarray([value for value in values if np.isfinite(value)], dtype=np.float32)
+    if finite.size == 0:
+        return {
+            f"{prefix}_mean": 0.0,
+            f"{prefix}_median": 0.0,
+            f"{prefix}_max": 0.0,
+            f"{prefix}_cv": 0.0,
+        }
+    mean_value = float(np.mean(finite))
+    return {
+        f"{prefix}_mean": mean_value,
+        f"{prefix}_median": float(np.median(finite)),
+        f"{prefix}_max": float(np.max(finite)),
+        f"{prefix}_cv": _safe_ratio(float(np.std(finite)), mean_value + 1e-6),
+    }
+
+
+def _log_puncta_25d_features(crop: np.ndarray) -> dict[str, float]:
+    defaults = {
+        "log_puncta_radius_px_mean": 0.0,
+        "log_puncta_radius_px_median": 0.0,
+        "log_puncta_radius_px_max": 0.0,
+        "log_puncta_radius_px_cv": 0.0,
+        "log_puncta_z_width_mean": 0.0,
+        "log_puncta_z_width_median": 0.0,
+        "log_puncta_z_width_max": 0.0,
+        "log_puncta_z_width_cv": 0.0,
+        "log_puncta_anisotropy_mean": 0.0,
+        "log_puncta_anisotropy_median": 0.0,
+        "log_puncta_anisotropy_max": 0.0,
+        "log_puncta_anisotropy_cv": 0.0,
+        "log_puncta_peak_signal_mean": 0.0,
+        "log_puncta_peak_signal_median": 0.0,
+        "log_puncta_peak_signal_max": 0.0,
+        "log_puncta_peak_signal_cv": 0.0,
+        "log_puncta_bgsub_peak_mean": 0.0,
+        "log_puncta_bgsub_peak_median": 0.0,
+        "log_puncta_bgsub_peak_max": 0.0,
+        "log_puncta_bgsub_peak_cv": 0.0,
+        "log_puncta_integrated_bgsub_mean": 0.0,
+        "log_puncta_integrated_bgsub_median": 0.0,
+        "log_puncta_integrated_bgsub_max": 0.0,
+        "log_puncta_integrated_bgsub_cv": 0.0,
+        "log_puncta_snr_mean": 0.0,
+        "log_puncta_snr_median": 0.0,
+        "log_puncta_snr_max": 0.0,
+        "log_puncta_snr_cv": 0.0,
+        "log_puncta_sbr_mean": 0.0,
+        "log_puncta_sbr_median": 0.0,
+        "log_puncta_sbr_max": 0.0,
+        "log_puncta_sbr_cv": 0.0,
+        "log_puncta_dominance": 0.0,
+    }
+    if blob_log is None:
+        return defaults
+
+    crop = np.asarray(crop, dtype=np.float32)
+    if crop.ndim != 3 or crop.size == 0:
+        return defaults
+
+    mean_proj = np.mean(crop, axis=0)
+    norm = _normalize_zero_one(mean_proj)
+    if not np.any(norm > 0):
+        return defaults
+
+    min_dim = min(norm.shape)
+    max_sigma = max(1.25, min(3.5, min_dim / 4.0))
+    threshold = max(0.02, float(np.std(norm)) * 0.75)
+    blobs = blob_log(
+        norm,
+        min_sigma=0.75,
+        max_sigma=max_sigma,
+        num_sigma=6,
+        threshold=threshold,
+        overlap=0.5,
+        exclude_border=False,
+    )
+    if len(blobs) == 0:
+        return defaults
+
+    yy, xx = np.indices(mean_proj.shape, dtype=np.float32)
+    radii: list[float] = []
+    z_widths: list[float] = []
+    anisotropies: list[float] = []
+    peak_signals: list[float] = []
+    bgsub_peaks: list[float] = []
+    integrated_bgsubs: list[float] = []
+    snrs: list[float] = []
+    sbrs: list[float] = []
+
+    for y, x, sigma in blobs:
+        radius = max(float(np.sqrt(2.0) * sigma), 1.0)
+        inner_dist_sq = (yy - y) ** 2 + (xx - x) ** 2
+        disk = inner_dist_sq <= radius**2
+        annulus = (inner_dist_sq >= (1.5 * radius) ** 2) & (inner_dist_sq <= (2.5 * radius) ** 2)
+        if not np.any(disk):
+            continue
+
+        signal_stack = crop[:, disk]
+        bg_stack = crop[:, annulus] if np.any(annulus) else crop.reshape(crop.shape[0], -1)
+        if signal_stack.size == 0 or bg_stack.size == 0:
+            continue
+
+        z_profile = np.mean(signal_stack, axis=1)
+        if z_profile.size == 0:
+            continue
+        peak_signal = float(np.max(z_profile))
+        halfmax = 0.5 * peak_signal
+        z_width = float(np.sum(z_profile >= halfmax))
+        bg_mean = float(np.mean(bg_stack))
+        bg_std = float(np.std(bg_stack))
+        bgsub_peak = float(max(peak_signal - bg_mean, 0.0))
+        signal_bgsub = np.maximum(signal_stack - bg_mean, 0.0)
+        integrated_bgsub = float(np.sum(signal_bgsub))
+        snr = _safe_ratio(bgsub_peak, bg_std + 1e-6)
+        sbr = _safe_ratio(peak_signal, bg_mean + 1e-6)
+
+        # Keep only plausible local puncta responses.
+        if bgsub_peak <= 0.0 and snr <= 0.5:
+            continue
+
+        radii.append(float(radius))
+        z_widths.append(z_width)
+        anisotropies.append(_safe_ratio(z_width, (2.0 * radius) + 1e-6))
+        peak_signals.append(peak_signal)
+        bgsub_peaks.append(bgsub_peak)
+        integrated_bgsubs.append(integrated_bgsub)
+        snrs.append(snr)
+        sbrs.append(sbr)
+
+    if not radii:
+        return defaults
+
+    features: dict[str, float] = {}
+    features.update(_summarize_blob_metric(radii, "log_puncta_radius_px"))
+    features.update(_summarize_blob_metric(z_widths, "log_puncta_z_width"))
+    features.update(_summarize_blob_metric(anisotropies, "log_puncta_anisotropy"))
+    features.update(_summarize_blob_metric(peak_signals, "log_puncta_peak_signal"))
+    features.update(_summarize_blob_metric(bgsub_peaks, "log_puncta_bgsub_peak"))
+    features.update(_summarize_blob_metric(integrated_bgsubs, "log_puncta_integrated_bgsub"))
+    features.update(_summarize_blob_metric(snrs, "log_puncta_snr"))
+    features.update(_summarize_blob_metric(sbrs, "log_puncta_sbr"))
+    total_bgsub = float(np.sum(integrated_bgsubs))
+    features["log_puncta_dominance"] = _safe_ratio(float(np.max(integrated_bgsubs)), total_bgsub)
+    return features
 
 
 def _z_profile_features(crop: np.ndarray) -> dict[str, float]:
@@ -335,6 +490,7 @@ def _channel_feature_block(channel: str, crop: np.ndarray, mask: np.ndarray) -> 
     lbp = _lbp_features(mean_proj)
     wavelet = _wavelet_like_features(mean_proj)
     z_features = _z_profile_features(crop)
+    log_puncta = _log_puncta_25d_features(crop)
     inside_bright_fraction = float(np.mean(bright_mask[mask])) if np.any(mask) else 0.0
     outside_bright_fraction = float(np.mean(bright_mask[~mask])) if np.any(~mask) else 0.0
 
@@ -377,6 +533,8 @@ def _channel_feature_block(channel: str, crop: np.ndarray, mask: np.ndarray) -> 
         feature_block[f"{channel.lower()}_{key}"] = float(value)
     for key, value in z_features.items():
         feature_block[f"{channel.lower()}_{key}"] = float(value)
+    for key, value in log_puncta.items():
+        feature_block[f"{channel.lower()}_{key}"] = float(value)
 
     stats_block = {
         "mean_proj": mean_proj,
@@ -391,8 +549,14 @@ def _channel_feature_block(channel: str, crop: np.ndarray, mask: np.ndarray) -> 
     return feature_block, stats_block
 
 
-def _map2_spatial_features(map2_mean_proj: np.ndarray, mask: np.ndarray, center_y: int, center_x: int, distance_to_mask_px: float) -> dict[str, float]:
-    center_intensity = float(map2_mean_proj[center_y, center_x])
+def _map2_spatial_features(
+    map2_mean_proj: np.ndarray | None,
+    mask: np.ndarray,
+    center_y: int,
+    center_x: int,
+    distance_to_mask_px: float,
+) -> dict[str, float]:
+    center_intensity = float(map2_mean_proj[center_y, center_x]) if map2_mean_proj is not None else 0.0
     thickness = 0.0
     if mask[center_y, center_x]:
         thickness = float(distance_transform_edt(mask)[center_y, center_x] * 2.0)
@@ -479,9 +643,14 @@ def extract_engineered_features(manifest: pd.DataFrame, channels: list[str]) -> 
             flat_record.update(feature_block)
             channel_stats[channel] = stats_block
 
-        map2_mean_proj = np.asarray(channel_stats["MAP2"]["mean_proj"], dtype=np.float32)
-        center_y = map2_mean_proj.shape[0] // 2
-        center_x = map2_mean_proj.shape[1] // 2
+        map2_mean_proj = (
+            np.asarray(channel_stats["MAP2"]["mean_proj"], dtype=np.float32)
+            if "MAP2" in channel_stats
+            else None
+        )
+        ref_shape = map2_mean_proj.shape if map2_mean_proj is not None else mask.shape
+        center_y = ref_shape[0] // 2
+        center_x = ref_shape[1] // 2
         flat_record.update(
             _map2_spatial_features(
                 map2_mean_proj=map2_mean_proj,

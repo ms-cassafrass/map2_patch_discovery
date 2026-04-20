@@ -7,6 +7,18 @@ from typing import Any
 import yaml
 
 
+VALID_SAMPLING_GROUPS = {
+    "in_mask",
+    "boundary",
+    "near_mask_outside",
+    "far_background",
+}
+VALID_SAMPLING_MODES = {
+    "grid_map2",
+    "detected_blobs",
+}
+
+
 @dataclass(frozen=True)
 class PatchConfig:
     width_px: int
@@ -22,11 +34,18 @@ class PatchConfig:
 
 @dataclass(frozen=True)
 class SamplingConfig:
+    mode: str
     groups: list[str]
     boundary_width_px: int
     near_outside_distance_px: int
     far_background_min_distance_px: int
     random_seed: int
+    blob_channels: list[str] | None = None
+    blob_min_sigma_px: float = 0.75
+    blob_max_sigma_px: float = 3.5
+    blob_num_sigma: int = 6
+    blob_threshold: float = 0.03
+    blob_overlap: float = 0.5
 
 
 @dataclass(frozen=True)
@@ -114,11 +133,22 @@ def load_dataset_config(config_path: str | Path) -> DatasetConfig:
         shard_by_group=bool(patch_raw.get("shard_by_group", True)),
     )
     sampling = SamplingConfig(
+        mode=str(sampling_raw.get("mode", "grid_map2")).lower(),
         groups=[str(group) for group in sampling_raw["groups"]],
         boundary_width_px=int(sampling_raw["boundary_width_px"]),
         near_outside_distance_px=int(sampling_raw["near_outside_distance_px"]),
         far_background_min_distance_px=int(sampling_raw["far_background_min_distance_px"]),
         random_seed=int(sampling_raw["random_seed"]),
+        blob_channels=(
+            None
+            if sampling_raw.get("blob_channels") is None
+            else [str(name) for name in sampling_raw.get("blob_channels", [])]
+        ),
+        blob_min_sigma_px=float(sampling_raw.get("blob_min_sigma_px", 0.75)),
+        blob_max_sigma_px=float(sampling_raw.get("blob_max_sigma_px", 3.5)),
+        blob_num_sigma=int(sampling_raw.get("blob_num_sigma", 6)),
+        blob_threshold=float(sampling_raw.get("blob_threshold", 0.03)),
+        blob_overlap=float(sampling_raw.get("blob_overlap", 0.5)),
     )
     cohort = CohortConfig(
         channel_schema=str(cohort_raw["channel_schema"]),
@@ -184,6 +214,25 @@ def validate_dataset_config(config: DatasetConfig) -> None:
         raise ValueError("Patch z_window must be odd for centered extraction")
     if not config.cohort.required_channels:
         raise ValueError("At least one required channel must be defined")
+    if not config.sampling.groups:
+        raise ValueError("At least one sampling group must be defined")
+    if config.sampling.mode not in VALID_SAMPLING_MODES:
+        valid_modes = ", ".join(sorted(VALID_SAMPLING_MODES))
+        raise ValueError(f"Invalid sampling.mode: {config.sampling.mode}. Valid modes: {valid_modes}")
+    invalid_groups = [group for group in config.sampling.groups if group not in VALID_SAMPLING_GROUPS]
+    if invalid_groups:
+        valid_groups = ", ".join(sorted(VALID_SAMPLING_GROUPS))
+        raise ValueError(f"Invalid sampling.groups values: {invalid_groups}. Valid groups: {valid_groups}")
+    if config.sampling.blob_min_sigma_px <= 0:
+        raise ValueError("sampling.blob_min_sigma_px must be positive")
+    if config.sampling.blob_max_sigma_px <= config.sampling.blob_min_sigma_px:
+        raise ValueError("sampling.blob_max_sigma_px must be greater than sampling.blob_min_sigma_px")
+    if config.sampling.blob_num_sigma <= 0:
+        raise ValueError("sampling.blob_num_sigma must be positive")
+    if config.sampling.blob_threshold <= 0:
+        raise ValueError("sampling.blob_threshold must be positive")
+    if not 0 <= config.sampling.blob_overlap <= 1:
+        raise ValueError("sampling.blob_overlap must be between 0 and 1")
     if not config.samples:
         raise ValueError("At least one sample must be defined")
 
@@ -203,3 +252,9 @@ def validate_dataset_config(config: DatasetConfig) -> None:
         missing = [name for name in config.cohort.required_channels if name not in sample.channel_names]
         if missing:
             raise ValueError(f"Sample {sample.sample_id} missing required channels: {missing}")
+        if config.sampling.blob_channels is not None:
+            invalid_blob_channels = [name for name in config.sampling.blob_channels if name not in sample.channel_names]
+            if invalid_blob_channels:
+                raise ValueError(
+                    f"Sample {sample.sample_id} missing sampling.blob_channels: {invalid_blob_channels}"
+                )

@@ -11,7 +11,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("input", help="Input OME-TIFF image path")
     parser.add_argument("-o", "--output-dir", required=True, help="Directory to write the analysis mask")
     parser.add_argument("--channel", type=int, default=0, help="Channel index for MAP2")
-    parser.add_argument("--time", type=int, default=0, help="Time index")
     parser.add_argument("--save-debug-png", action=argparse.BooleanOptionalAction, default=True, help="Save a preview PNG")
     parser.add_argument("--mip-mask-method", choices=("threshold", "hysteresis"), default="hysteresis")
     parser.add_argument("--mip-mask-high-percentile", type=float, default=99.5)
@@ -34,7 +33,6 @@ def main() -> None:
         input_path=Path(args.input).resolve(),
         output_dir=Path(args.output_dir).resolve(),
         channel=int(args.channel),
-        time=int(args.time),
         save_debug_png=bool(args.save_debug_png),
         mip_mask_method=str(args.mip_mask_method),
         mip_mask_high_percentile=float(args.mip_mask_high_percentile),

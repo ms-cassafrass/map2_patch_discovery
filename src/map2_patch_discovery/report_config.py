@@ -21,6 +21,11 @@ class ReductionConfig:
 
 
 @dataclass(frozen=True)
+class PreprocessingConfig:
+    scaler: str = "standard"
+
+
+@dataclass(frozen=True)
 class ClusteringConfig:
     method: str
     n_clusters: int
@@ -38,6 +43,7 @@ class LatentReportConfig:
     output_dir: Path
     features: FeatureReportConfig
     dimensionality_reduction: ReductionConfig
+    preprocessing: PreprocessingConfig
     clustering: ClusteringConfig
     reporting: ReportingConfig
 
@@ -89,6 +95,9 @@ def load_latent_report_config(path: str | Path) -> LatentReportConfig:
             map2_feature_policy=str(raw["features"].get("map2_feature_policy", "full")).lower(),
         ),
         dimensionality_reduction=ReductionConfig(n_pca_components=int(raw["dimensionality_reduction"]["n_pca_components"])),
+        preprocessing=PreprocessingConfig(
+            scaler=str(raw.get("preprocessing", {}).get("scaler", "standard")).lower(),
+        ),
         clustering=ClusteringConfig(
             method=str(raw["clustering"]["method"]).lower(),
             n_clusters=int(raw["clustering"]["n_clusters"]),
@@ -103,8 +112,12 @@ def load_latent_report_config(path: str | Path) -> LatentReportConfig:
 def validate_latent_report_config(config: LatentReportConfig) -> None:
     if not config.manifest_path.exists():
         raise ValueError(f"Manifest file not found: {config.manifest_path}")
+    if "MAP2" not in config.features.channels:
+        raise ValueError("features.channels must include MAP2")
     if config.dimensionality_reduction.n_pca_components <= 0:
         raise ValueError("n_pca_components must be positive")
+    if config.preprocessing.scaler not in {"standard", "robust", "minmax", "none"}:
+        raise ValueError("preprocessing.scaler must be one of: standard, robust, minmax, none")
     if config.clustering.method not in {"gmm", "kmeans"}:
         raise ValueError("clustering.method must be one of: gmm, kmeans")
     if config.clustering.n_clusters <= 1:
@@ -117,5 +130,14 @@ def validate_latent_report_config(config: LatentReportConfig) -> None:
         )
     if config.features.feature_variance_csv is not None and not config.features.feature_variance_csv.exists():
         raise ValueError(f"Feature variance CSV not found: {config.features.feature_variance_csv}")
-    if config.features.map2_feature_policy not in {"full", "prior_only"}:
-        raise ValueError("features.map2_feature_policy must be one of: full, prior_only")
+    if config.features.map2_feature_policy not in {
+        "full",
+        "prior_only",
+        "exclude_spatial",
+        "exclude_spatial_and_dendrite",
+        "exclude_all_map2",
+        "mask_internal_only",
+    }:
+        raise ValueError(
+            "features.map2_feature_policy must be one of: full, prior_only, exclude_spatial, exclude_spatial_and_dendrite, exclude_all_map2, mask_internal_only"
+        )
